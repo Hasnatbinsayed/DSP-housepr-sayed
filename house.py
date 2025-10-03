@@ -13,8 +13,25 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_log_error
 import warnings
 import os
+from datetime import datetime
 
 warnings.filterwarnings('ignore')
+
+# =============================================================================
+# RESULTS FOLDER SETUP
+# =============================================================================
+
+def setup_results_folder():
+    """
+    Create results folder to store all visualization images
+    """
+    results_dir = './results'
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+        print(f"✅ Created results folder: {results_dir}")
+    else:
+        print(f"✅ Results folder already exists: {results_dir}")
+    return results_dir
 
 # =============================================================================
 # COMPETITION METRIC FUNCTION (AS SPECIFIED IN INSTRUCTIONS)
@@ -238,7 +255,7 @@ def train_models(X_train, y_train):
 # 5. MODEL EVALUATION WITH COMPETITION METRIC
 # =============================================================================
 
-def evaluate_models(trained_models, X_test, y_test):
+def evaluate_models(trained_models, X_test, y_test, results_dir):
     """
     Evaluate models using competition metric RMSLE
     """
@@ -273,15 +290,18 @@ def evaluate_models(trained_models, X_test, y_test):
         print(f"   - Max prediction: ${y_pred.max():,.2f}")
         print(f"   - Mean prediction: ${y_pred.mean():,.2f}")
     
+    # Plot prediction vs actual
+    plot_predictions_vs_actual(y_test, results, results_dir)
+    
     return results
 
 # =============================================================================
-# VISUALIZATION FUNCTIONS
+# VISUALIZATION FUNCTIONS (WITH SAVE TO RESULTS FOLDER)
 # =============================================================================
 
-def plot_feature_distributions(df, continuous_features, categorical_features):
+def plot_feature_distributions(df, continuous_features, categorical_features, results_dir):
     """
-    Plot distributions of selected features
+    Plot distributions of selected features and save to results folder
     """
     print("\n📊 Plotting feature distributions...")
     
@@ -298,7 +318,9 @@ def plot_feature_distributions(df, continuous_features, categorical_features):
             axes[i].set_ylabel('Frequency')
         
         plt.tight_layout()
+        plt.savefig(f'{results_dir}/continuous_features_distribution.png', dpi=300, bbox_inches='tight')
         plt.show()
+        print(f"✅ Saved continuous features distribution to {results_dir}/continuous_features_distribution.png")
     
     # Plot categorical features
     if categorical_features:
@@ -315,11 +337,13 @@ def plot_feature_distributions(df, continuous_features, categorical_features):
             axes[i].tick_params(axis='x', rotation=45)
         
         plt.tight_layout()
+        plt.savefig(f'{results_dir}/categorical_features_distribution.png', dpi=300, bbox_inches='tight')
         plt.show()
+        print(f"✅ Saved categorical features distribution to {results_dir}/categorical_features_distribution.png")
 
-def plot_target_distribution(df):
+def plot_target_distribution(df, results_dir):
     """
-    Plot distribution of target variable
+    Plot distribution of target variable and save to results folder
     """
     print("\n📊 Plotting target variable distribution...")
     
@@ -338,7 +362,87 @@ def plot_target_distribution(df):
     plt.ylabel('Frequency')
     
     plt.tight_layout()
+    plt.savefig(f'{results_dir}/target_distribution.png', dpi=300, bbox_inches='tight')
     plt.show()
+    print(f"✅ Saved target distribution to {results_dir}/target_distribution.png")
+
+def plot_predictions_vs_actual(y_test, results, results_dir):
+    """
+    Plot predictions vs actual values for all models and save to results folder
+    """
+    print("\n📊 Plotting predictions vs actual values...")
+    
+    n_models = len(results)
+    fig, axes = plt.subplots(1, n_models, figsize=(15, 6))
+    if n_models == 1:
+        axes = [axes]
+    
+    for idx, (name, result) in enumerate(results.items()):
+        y_pred = result['predictions']
+        rmsle = result['rmsle']
+        
+        axes[idx].scatter(y_test, y_pred, alpha=0.6, color='blue')
+        axes[idx].plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
+        axes[idx].set_xlabel('Actual Sale Price')
+        axes[idx].set_ylabel('Predicted Sale Price')
+        axes[idx].set_title(f'{name}\nRMSLE: {rmsle}')
+        axes[idx].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(f'{results_dir}/predictions_vs_actual.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    print(f"✅ Saved predictions vs actual to {results_dir}/predictions_vs_actual.png")
+
+def plot_model_comparison(results, results_dir):
+    """
+    Plot model comparison bar chart and save to results folder
+    """
+    print("\n📊 Plotting model comparison...")
+    
+    model_names = list(results.keys())
+    rmsle_scores = [results[name]['rmsle'] for name in model_names]
+    
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(model_names, rmsle_scores, color=['skyblue', 'lightcoral'], edgecolor='black')
+    
+    plt.title('Model Comparison - RMSLE Scores', fontsize=14, fontweight='bold')
+    plt.ylabel('RMSLE Score (Lower is Better)')
+    plt.xlabel('Models')
+    
+    # Add value labels on bars
+    for bar, score in zip(bars, rmsle_scores):
+        plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
+                f'{score}', ha='center', va='bottom', fontweight='bold')
+    
+    plt.grid(True, alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(f'{results_dir}/model_comparison.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    print(f"✅ Saved model comparison to {results_dir}/model_comparison.png")
+
+def plot_feature_importance(feature_importance_df, results_dir):
+    """
+    Plot feature importance and save to results folder
+    """
+    print("\n📊 Plotting feature importance...")
+    
+    plt.figure(figsize=(10, 8))
+    features = feature_importance_df['feature'][:10]  # Top 10 features
+    importance = feature_importance_df['importance'][:10]
+    
+    y_pos = np.arange(len(features))
+    
+    plt.barh(y_pos, importance, color='lightgreen', edgecolor='black')
+    plt.yticks(y_pos, features)
+    plt.xlabel('Feature Importance')
+    plt.title('Top 10 Feature Importance - Random Forest', fontsize=14, fontweight='bold')
+    plt.gca().invert_yaxis()  # Most important at top
+    plt.grid(True, alpha=0.3, axis='x')
+    
+    plt.tight_layout()
+    plt.savefig(f'{results_dir}/feature_importance.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    print(f"✅ Saved feature importance to {results_dir}/feature_importance.png")
 
 # =============================================================================
 # MAIN EXECUTION PIPELINE
@@ -356,6 +460,9 @@ def main():
     print("Branch: pw1")
     print("Notebook: notebooks/house-prices-modeling.ipynb")
     print("="*70)
+    
+    # Setup results folder
+    results_dir = setup_results_folder()
     
     # =========================================================================
     # 1. DATA SETUP AND LOADING
@@ -423,7 +530,7 @@ def main():
         print(f"   - Standard Deviation: ${df['SalePrice'].std():,.2f}")
     
     # Plot target distribution
-    plot_target_distribution(df)
+    plot_target_distribution(df, results_dir)
     
     # =========================================================================
     # 2. FEATURE SELECTION
@@ -443,7 +550,7 @@ def main():
         print(df[feature].value_counts().head(5))  # Show top 5 only
     
     # Plot feature distributions
-    plot_feature_distributions(df, continuous_features, categorical_features)
+    plot_feature_distributions(df, continuous_features, categorical_features, results_dir)
     
     # =========================================================================
     # 3. FEATURE PROCESSING
@@ -489,7 +596,10 @@ def main():
     print("\n\n📊 STEP 5: MODEL EVALUATION")
     print("-" * 40)
     
-    results = evaluate_models(trained_models, X_test, y_test)
+    results = evaluate_models(trained_models, X_test, y_test, results_dir)
+    
+    # Plot model comparison
+    plot_model_comparison(results, results_dir)
     
     # =========================================================================
     # FINAL RESULTS SUMMARY
@@ -510,6 +620,18 @@ def main():
     for i, (name, result) in enumerate(models_sorted, 1):
         print(f"   {i}. {name}: RMSLE = {result['rmsle']}")
     
+    # Show feature importance if available
+    if best_model_name == 'Random Forest':
+        print(f"\n🔍 RANDOM FOREST FEATURE IMPORTANCE (Top 10):")
+        best_model = results[best_model_name]['model']
+        feature_importance = pd.DataFrame({
+            'feature': X_processed.columns,
+            'importance': best_model.feature_importances_
+        }).sort_values('importance', ascending=False)
+        
+        print(feature_importance.head(10).round(4))
+        plot_feature_importance(feature_importance, results_dir)
+    
     # REQUIREMENTS COMPLIANCE VERIFICATION
     print(f"\n" + "="*50)
     print("REQUIREMENTS COMPLIANCE VERIFICATION")
@@ -520,6 +642,7 @@ def main():
     print(f"   ✓ Branch: pw1")
     print(f"   ✓ Notebook location: notebooks/house-prices-modeling.ipynb")
     print(f"   ✓ Data location: data/train.csv (in .gitignore)")
+    print(f"   ✓ Results folder: {results_dir}/ (contains all visualization images)")
     
     print(f"\n✅ MODELING REQUIREMENTS:")
     print(f"   ✓ Minimum 2 continuous features: {continuous_features}")
@@ -535,6 +658,7 @@ def main():
     print(f"   ✓ Cell outputs preserved for grading")
     print(f"   ✓ Dataframe displays limited (head() used)")
     print(f"   ✓ Comments and documentation included")
+    print(f"   ✓ All visualization images saved to {results_dir}/")
     
     print(f"\n✅ GIT REQUIREMENTS:")
     print(f"   ✓ Working on pw1 branch")
@@ -542,16 +666,13 @@ def main():
     print(f"   ✓ requirements.txt updated")
     print(f"   ✓ Ready to merge to main branch")
     
-    # Show feature importance if available
-    if best_model_name == 'Random Forest':
-        print(f"\n🔍 RANDOM FOREST FEATURE IMPORTANCE (Top 10):")
-        best_model = results[best_model_name]['model']
-        feature_importance = pd.DataFrame({
-            'feature': X_processed.columns,
-            'importance': best_model.feature_importances_
-        }).sort_values('importance', ascending=False)
-        
-        print(feature_importance.head(10).round(4))
+    # List all saved result files
+    print(f"\n📁 SAVED RESULT FILES IN {results_dir}/:")
+    result_files = os.listdir(results_dir)
+    for file in result_files:
+        if file.endswith('.png'):
+            file_size = os.path.getsize(f"{results_dir}/{file}") / 1024  # Size in KB
+            print(f"   - {file} ({file_size:.1f} KB)")
     
     print(f"\n🎯 SUBMISSION INSTRUCTIONS:")
     print(f"   1. Merge pw1 branch to main: git checkout main && git merge pw1")
@@ -561,6 +682,7 @@ def main():
     
     print(f"\n✨ PIPELINE COMPLETED SUCCESSFULLY!")
     print(f"✨ ALL PW1 REQUIREMENTS VERIFIED AND MET!")
+    print(f"✨ ALL VISUALIZATIONS SAVED TO {results_dir}/")
     print(f"✨ READY FOR SUBMISSION!")
 
 # Execute the main pipeline
