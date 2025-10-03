@@ -1,6 +1,6 @@
 # Housing Price Prediction - PW1 Assignment
 # Hasnat bin sayed
-# EPITA Data Science in Production
+
 
 import pandas as pd
 import numpy as np
@@ -28,9 +28,9 @@ def setup_results_folder():
     results_dir = './results'
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
-        print(f"✅ Created results folder: {results_dir}")
+        print(f" Created results folder: {results_dir}")
     else:
-        print(f"✅ Results folder already exists: {results_dir}")
+        print(f" Results folder already exists: {results_dir}")
     return results_dir
 
 # =============================================================================
@@ -55,11 +55,11 @@ def compute_rmsle(y_test: np.ndarray, y_pred: np.ndarray, precision: int = 2) ->
 
 def validate_dataset(df):
     """Validate dataset meets competition requirements"""
-    print("🔍 Validating dataset...")
+    print(" Validating dataset...")
     assert 'SalePrice' in df.columns, "Target variable 'SalePrice' not found"
     assert len(df) > 1000, "Dataset too small"
     assert df.shape[1] > 10, "Insufficient features in dataset"
-    print("✓ Dataset validation passed")
+    print("Dataset validation passed")
 
 def load_data(file_path):
     """
@@ -68,16 +68,16 @@ def load_data(file_path):
     """
     try:
         df = pd.read_csv(file_path)
-        print(f"✓ Dataset loaded successfully from {file_path}")
-        print(f"✓ Dataset shape: {df.shape}")
+        print(f" Dataset loaded successfully from {file_path}")
+        print(f" Dataset shape: {df.shape}")
         validate_dataset(df)
         return df
     except FileNotFoundError:
-        print(f"✗ Error: File not found at {file_path}")
+        print(f" Error: File not found at {file_path}")
         print("Please ensure train.csv is in the data/ folder as per repository structure")
         return None
     except Exception as e:
-        print(f"✗ Error loading dataset: {e}")
+        print(f" Error loading dataset: {e}")
         return None
 
 # =============================================================================
@@ -138,16 +138,16 @@ def select_features(df):
     assert len(selected_continuous) >= 2, "Must select at least 2 continuous features"
     assert len(selected_categorical) >= 2, "Must select at least 2 categorical features"
     
-    print(f"\n✅ SELECTED CONTINUOUS FEATURES ({len(selected_continuous)}):")
+    print(f"\n SELECTED CONTINUOUS FEATURES ({len(selected_continuous)}):")
     for feature in selected_continuous:
         print(f"   - {feature}")
     
-    print(f"\n✅ SELECTED CATEGORICAL FEATURES ({len(selected_categorical)}):")
+    print(f"\n SELECTED CATEGORICAL FEATURES ({len(selected_categorical)}):")
     for feature in selected_categorical:
         print(f"   - {feature}")
     
     # Feature selection rationale
-    print(f"\n📝 FEATURE SELECTION RATIONALE:")
+    print(f"\n FEATURE SELECTION RATIONALE:")
     print(f"   Continuous: {selected_continuous[0]} (living area), {selected_continuous[1]} (basement size) - direct size indicators")
     print(f"   Categorical: {selected_categorical[0]} (location), {selected_categorical[1]} (architecture style) - important categorical factors")
     
@@ -171,7 +171,7 @@ def preprocess_features(df, continuous_features, categorical_features):
     df_processed = df.copy()
     
     # Handle missing values
-    print("\n🔧 Handling missing values...")
+    print("\n Handling missing values...")
     
     # Continuous features: fill with median
     for feature in continuous_features:
@@ -192,7 +192,7 @@ def preprocess_features(df, continuous_features, categorical_features):
             print(f"   - {feature}: no missing values")
     
     # SCALE CONTINUOUS FEATURES (REQUIREMENT)
-    print("\n🔧 Scaling continuous features...")
+    print("\n Scaling continuous features...")
     scaler = StandardScaler()
     scaled_continuous = scaler.fit_transform(df_processed[continuous_features])
     
@@ -201,7 +201,7 @@ def preprocess_features(df, continuous_features, categorical_features):
     print(f"   - Scaled {len(continuous_features)} continuous features using StandardScaler")
     
     # ENCODE CATEGORICAL FEATURES (REQUIREMENT)
-    print("\n🔧 Encoding categorical features...")
+    print("\n Encoding categorical features...")
     label_encoders = {}
     encoded_features = []
     
@@ -216,8 +216,8 @@ def preprocess_features(df, continuous_features, categorical_features):
     # Combine all processed features
     final_features_df = pd.concat([scaled_df] + encoded_features, axis=1)
     
-    print(f"\n✅ Final processed features shape: {final_features_df.shape}")
-    print(f"✅ Processed feature names: {list(final_features_df.columns)}")
+    print(f"\n Final processed features shape: {final_features_df.shape}")
+    print(f" Processed feature names: {list(final_features_df.columns)}")
     
     return final_features_df, scaler, label_encoders
 
@@ -242,10 +242,10 @@ def train_models(X_train, y_train):
     trained_models = {}
     
     for name, model in models.items():
-        print(f"\n🏋️ Training {name}...")
+        print(f"\n Training {name}...")
         model.fit(X_train, y_train)
         trained_models[name] = model
-        print(f"✅ {name} training completed")
+        print(f" {name} training completed")
         print(f"   - Training samples: {X_train.shape[0]}")
         print(f"   - Features: {X_train.shape[1]}")
     
@@ -266,7 +266,7 @@ def evaluate_models(trained_models, X_test, y_test, results_dir):
     results = {}
     
     for name, model in trained_models.items():
-        print(f"\n📊 Evaluating {name}...")
+        print(f"\n Evaluating {name}...")
         
         # Make predictions
         y_pred = model.predict(X_test)
@@ -284,7 +284,7 @@ def evaluate_models(trained_models, X_test, y_test, results_dir):
             'predictions': y_pred
         }
         
-        print(f"✅ {name} RMSLE: {rmsle}")
+        print(f" {name} RMSLE: {rmsle}")
         print(f"   - Test samples: {len(y_test)}")
         print(f"   - Min prediction: ${y_pred.min():,.2f}")
         print(f"   - Max prediction: ${y_pred.max():,.2f}")
@@ -303,7 +303,7 @@ def plot_feature_distributions(df, continuous_features, categorical_features, re
     """
     Plot distributions of selected features and save to results folder
     """
-    print("\n📊 Plotting feature distributions...")
+    print("\n Plotting feature distributions...")
     
     # Plot continuous features
     if continuous_features:
@@ -320,7 +320,7 @@ def plot_feature_distributions(df, continuous_features, categorical_features, re
         plt.tight_layout()
         plt.savefig(f'{results_dir}/continuous_features_distribution.png', dpi=300, bbox_inches='tight')
         plt.show()
-        print(f"✅ Saved continuous features distribution to {results_dir}/continuous_features_distribution.png")
+        print(f" Saved continuous features distribution to {results_dir}/continuous_features_distribution.png")
     
     # Plot categorical features
     if categorical_features:
@@ -339,13 +339,13 @@ def plot_feature_distributions(df, continuous_features, categorical_features, re
         plt.tight_layout()
         plt.savefig(f'{results_dir}/categorical_features_distribution.png', dpi=300, bbox_inches='tight')
         plt.show()
-        print(f"✅ Saved categorical features distribution to {results_dir}/categorical_features_distribution.png")
+        print(f" Saved categorical features distribution to {results_dir}/categorical_features_distribution.png")
 
 def plot_target_distribution(df, results_dir):
     """
     Plot distribution of target variable and save to results folder
     """
-    print("\n📊 Plotting target variable distribution...")
+    print("\n Plotting target variable distribution...")
     
     plt.figure(figsize=(12, 5))
     
@@ -364,13 +364,13 @@ def plot_target_distribution(df, results_dir):
     plt.tight_layout()
     plt.savefig(f'{results_dir}/target_distribution.png', dpi=300, bbox_inches='tight')
     plt.show()
-    print(f"✅ Saved target distribution to {results_dir}/target_distribution.png")
+    print(f" Saved target distribution to {results_dir}/target_distribution.png")
 
 def plot_predictions_vs_actual(y_test, results, results_dir):
     """
     Plot predictions vs actual values for all models and save to results folder
     """
-    print("\n📊 Plotting predictions vs actual values...")
+    print("\n Plotting predictions vs actual values...")
     
     n_models = len(results)
     fig, axes = plt.subplots(1, n_models, figsize=(15, 6))
@@ -391,13 +391,13 @@ def plot_predictions_vs_actual(y_test, results, results_dir):
     plt.tight_layout()
     plt.savefig(f'{results_dir}/predictions_vs_actual.png', dpi=300, bbox_inches='tight')
     plt.show()
-    print(f"✅ Saved predictions vs actual to {results_dir}/predictions_vs_actual.png")
+    print(f" Saved predictions vs actual to {results_dir}/predictions_vs_actual.png")
 
 def plot_model_comparison(results, results_dir):
     """
     Plot model comparison bar chart and save to results folder
     """
-    print("\n📊 Plotting model comparison...")
+    print("\n Plotting model comparison...")
     
     model_names = list(results.keys())
     rmsle_scores = [results[name]['rmsle'] for name in model_names]
@@ -418,13 +418,13 @@ def plot_model_comparison(results, results_dir):
     plt.tight_layout()
     plt.savefig(f'{results_dir}/model_comparison.png', dpi=300, bbox_inches='tight')
     plt.show()
-    print(f"✅ Saved model comparison to {results_dir}/model_comparison.png")
+    print(f" Saved model comparison to {results_dir}/model_comparison.png")
 
 def plot_feature_importance(feature_importance_df, results_dir):
     """
     Plot feature importance and save to results folder
     """
-    print("\n📊 Plotting feature importance...")
+    print("\n Plotting feature importance...")
     
     plt.figure(figsize=(10, 8))
     features = feature_importance_df['feature'][:10]  # Top 10 features
@@ -442,7 +442,7 @@ def plot_feature_importance(feature_importance_df, results_dir):
     plt.tight_layout()
     plt.savefig(f'{results_dir}/feature_importance.png', dpi=300, bbox_inches='tight')
     plt.show()
-    print(f"✅ Saved feature importance to {results_dir}/feature_importance.png")
+    print(f" Saved feature importance to {results_dir}/feature_importance.png")
 
 # =============================================================================
 # MAIN EXECUTION PIPELINE
@@ -467,7 +467,7 @@ def main():
     # =========================================================================
     # 1. DATA SETUP AND LOADING
     # =========================================================================
-    print("\n📁 STEP 1: DATA SETUP AND LOADING")
+    print("\n STEP 1: DATA SETUP AND LOADING")
     print("-" * 40)
     
     # Try multiple possible file locations with data folder priority
@@ -481,18 +481,18 @@ def main():
     df = None
     for file_path in possible_paths:
         if os.path.exists(file_path):
-            print(f"✓ Found dataset at: {file_path}")
+            print(f" Found dataset at: {file_path}")
             df = load_data(file_path)
             if df is not None:
                 break
     
     if df is None:
-        print("❌ Failed to load data. Please ensure train.csv is in one of these locations:")
+        print(" Failed to load data. Please ensure train.csv is in one of these locations:")
         for path in possible_paths:
             print(f"   - {path}")
         
         # Show available files for debugging
-        print("\n🔍 Available files in current directory:")
+        print("\n Available files in current directory:")
         try:
             files = os.listdir('.')
             csv_files = [f for f in files if f.endswith('.csv')]
@@ -512,17 +512,17 @@ def main():
         return
     
     # Display basic dataset information
-    print(f"\n📊 DATASET OVERVIEW:")
+    print(f"\n DATASET OVERVIEW:")
     print(f"   - Shape: {df.shape} ({df.shape[0]} rows, {df.shape[1]} columns)")
     print(f"   - Memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
     
     # Display first few rows (limited to 5 as per instructions)
-    print(f"\n👀 FIRST 5 ROWS OF THE DATASET:")
+    print(f"\n FIRST 5 ROWS OF THE DATASET:")
     print(df.head().to_string())
     
     # Display target variable information
     if 'SalePrice' in df.columns:
-        print(f"\n🎯 TARGET VARIABLE 'SalePrice' ANALYSIS:")
+        print(f"\n TARGET VARIABLE 'SalePrice' ANALYSIS:")
         print(f"   - Min: ${df['SalePrice'].min():,.2f}")
         print(f"   - Max: ${df['SalePrice'].max():,.2f}")
         print(f"   - Mean: ${df['SalePrice'].mean():,.2f}")
@@ -535,16 +535,16 @@ def main():
     # =========================================================================
     # 2. FEATURE SELECTION
     # =========================================================================
-    print("\n\n🔍 STEP 2: FEATURE SELECTION")
+    print("\n\n STEP 2: FEATURE SELECTION")
     print("-" * 40)
     
     continuous_features, categorical_features = select_features(df)
     
     # Display selected features statistics
-    print(f"\n📈 SELECTED CONTINUOUS FEATURES STATISTICS:")
+    print(f"\n SELECTED CONTINUOUS FEATURES STATISTICS:")
     print(df[continuous_features].describe().round(2))
     
-    print(f"\n📊 SELECTED CATEGORICAL FEATURES VALUE COUNTS:")
+    print(f"\n SELECTED CATEGORICAL FEATURES VALUE COUNTS:")
     for feature in categorical_features:
         print(f"\n{feature}:")
         print(df[feature].value_counts().head(5))  # Show top 5 only
@@ -555,15 +555,15 @@ def main():
     # =========================================================================
     # 3. FEATURE PROCESSING
     # =========================================================================
-    print("\n\n⚙️ STEP 3: FEATURE PROCESSING")
+    print("\n\n STEP 3: FEATURE PROCESSING")
     print("-" * 40)
     
     # Prepare features and target
     X_raw = df[continuous_features + categorical_features]
     y = df['SalePrice']
     
-    print(f"📦 Raw features shape: {X_raw.shape}")
-    print(f"🎯 Target shape: {y.shape}")
+    print(f" Raw features shape: {X_raw.shape}")
+    print(f" Target shape: {y.shape}")
     
     # Process features (scale continuous, encode categorical)
     X_processed, scaler, label_encoders = preprocess_features(
@@ -575,7 +575,7 @@ def main():
         X_processed, y, test_size=0.2, random_state=42, shuffle=True
     )
     
-    print(f"\n📊 DATA SPLIT RESULTS:")
+    print(f"\n DATA SPLIT RESULTS:")
     print(f"   - Training set: {X_train.shape} (80% of data)")
     print(f"   - Testing set: {X_test.shape} (20% of data)")
     print(f"   - Training target: {y_train.shape}")
@@ -585,7 +585,7 @@ def main():
     # =========================================================================
     # 4. MODEL TRAINING
     # =========================================================================
-    print("\n\n🤖 STEP 4: MODEL TRAINING")
+    print("\n\n STEP 4: MODEL TRAINING")
     print("-" * 40)
     
     trained_models = train_models(X_train, y_train)
@@ -593,7 +593,7 @@ def main():
     # =========================================================================
     # 5. MODEL EVALUATION
     # =========================================================================
-    print("\n\n📊 STEP 5: MODEL EVALUATION")
+    print("\n\n STEP 5: MODEL EVALUATION")
     print("-" * 40)
     
     results = evaluate_models(trained_models, X_test, y_test, results_dir)
@@ -612,17 +612,17 @@ def main():
     best_model_name = min(results.keys(), key=lambda x: results[x]['rmsle'])
     best_rmsle = results[best_model_name]['rmsle']
     
-    print(f"\n🏆 BEST PERFORMING MODEL: {best_model_name}")
-    print(f"📊 BEST RMSLE SCORE: {best_rmsle}")
+    print(f"\n BEST PERFORMING MODEL: {best_model_name}")
+    print(f" BEST RMSLE SCORE: {best_rmsle}")
     
-    print(f"\n📈 ALL MODEL RESULTS (sorted by RMSLE):")
+    print(f"\n ALL MODEL RESULTS (sorted by RMSLE):")
     models_sorted = sorted(results.items(), key=lambda x: x[1]['rmsle'])
     for i, (name, result) in enumerate(models_sorted, 1):
         print(f"   {i}. {name}: RMSLE = {result['rmsle']}")
     
     # Show feature importance if available
     if best_model_name == 'Random Forest':
-        print(f"\n🔍 RANDOM FOREST FEATURE IMPORTANCE (Top 10):")
+        print(f"\n RANDOM FOREST FEATURE IMPORTANCE (Top 10):")
         best_model = results[best_model_name]['model']
         feature_importance = pd.DataFrame({
             'feature': X_processed.columns,
@@ -632,58 +632,26 @@ def main():
         print(feature_importance.head(10).round(4))
         plot_feature_importance(feature_importance, results_dir)
     
-    # REQUIREMENTS COMPLIANCE VERIFICATION
+    #  VERIFICATION
     print(f"\n" + "="*50)
-    print("REQUIREMENTS COMPLIANCE VERIFICATION")
+    print(" VERIFICATION")
     print("="*50)
-    
-    print(f"✅ REPOSITORY STRUCTURE:")
-    print(f"   ✓ Repository: dsp-firstname-lastname")
-    print(f"   ✓ Branch: pw1")
-    print(f"   ✓ Notebook location: notebooks/house-prices-modeling.ipynb")
-    print(f"   ✓ Data location: data/train.csv (in .gitignore)")
     print(f"   ✓ Results folder: {results_dir}/ (contains all visualization images)")
     
-    print(f"\n✅ MODELING REQUIREMENTS:")
-    print(f"   ✓ Minimum 2 continuous features: {continuous_features}")
-    print(f"   ✓ Minimum 2 categorical features: {categorical_features}")
-    print(f"   ✓ Continuous features scaled: StandardScaler")
-    print(f"   ✓ Categorical features encoded: LabelEncoder")
-    print(f"   ✓ No ColumnTransformer/Pipeline used: Manual processing")
-    print(f"   ✓ Competition metric RMSLE computed")
-    print(f"   ✓ Multiple models trained and evaluated")
+    print(f"    All visualization images saved to {results_dir}/")
     
-    print(f"\n✅ NOTEBOOK REQUIREMENTS:")
-    print(f"   ✓ Organized with clear headers and sections")
-    print(f"   ✓ Cell outputs preserved for grading")
-    print(f"   ✓ Dataframe displays limited (head() used)")
-    print(f"   ✓ Comments and documentation included")
-    print(f"   ✓ All visualization images saved to {results_dir}/")
-    
-    print(f"\n✅ GIT REQUIREMENTS:")
-    print(f"   ✓ Working on pw1 branch")
-    print(f"   ✓ data/ folder in .gitignore")
-    print(f"   ✓ requirements.txt updated")
-    print(f"   ✓ Ready to merge to main branch")
-    
+   
     # List all saved result files
-    print(f"\n📁 SAVED RESULT FILES IN {results_dir}/:")
+    print(f"\n SAVED RESULT FILES IN {results_dir}/:")
     result_files = os.listdir(results_dir)
     for file in result_files:
         if file.endswith('.png'):
             file_size = os.path.getsize(f"{results_dir}/{file}") / 1024  # Size in KB
             print(f"   - {file} ({file_size:.1f} KB)")
+
     
-    print(f"\n🎯 SUBMISSION INSTRUCTIONS:")
-    print(f"   1. Merge pw1 branch to main: git checkout main && git merge pw1")
-    print(f"   2. Push to GitHub: git push origin main")
-    print(f"   3. Submit this URL on Teams:")
-    print(f"      https://github.com/your-username/dsp-firstname-lastname/blob/main/notebooks/house-prices-modeling.ipynb")
-    
-    print(f"\n✨ PIPELINE COMPLETED SUCCESSFULLY!")
-    print(f"✨ ALL PW1 REQUIREMENTS VERIFIED AND MET!")
-    print(f"✨ ALL VISUALIZATIONS SAVED TO {results_dir}/")
-    print(f"✨ READY FOR SUBMISSION!")
+    print(f" ALL VISUALIZATIONS SAVED TO {results_dir}/")
+  
 
 # Execute the main pipeline
 if __name__ == "__main__":
